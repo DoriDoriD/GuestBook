@@ -1,0 +1,33 @@
+name: Deploy GuestBook to Azure
+
+on:
+push:
+branches:
+- clean-master
+workflow_dispatch:
+
+jobs:
+build-and-deploy:
+runs-on: ubuntu-latest
+
+steps:
+  - name: Checkout repository
+    uses: actions/checkout@v4
+
+  - name: Login to Azure
+    uses: azure/login@v2
+    with:
+      creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+  - name: Build and push image
+    run: |
+      az acr login --name ca337f2f159bacr
+      docker build -t ca337f2f159bacr.azurecr.io/guestbook-daria:${{ github.sha }} .
+      docker push ca337f2f159bacr.azurecr.io/guestbook-daria:${{ github.sha }}
+
+  - name: Deploy to Azure Container Apps
+    run: |
+      az containerapp update \
+        --name guestbook-daria \
+        --resource-group GuestBook-RG \
+        --image ca337f2f159bacr.azurecr.io/guestbook-daria:${{ github.sha }}
