@@ -1,0 +1,31 @@
+﻿@page
+@model IndexModel
+
+@{
+ViewData["Title"] = "Главная страница";
+}
+
+@foreach (var entry in Model.Entries)
+{
+<div class="card mb-3">
+<div class="card-body">
+<h5 class="card-title">@entry.GuestName</h5>
+<p class="card-text">@entry.Message</p>
+
+        @if (!string.IsNullOrEmpty(entry.PhotoUrl) &&
+             entry.PhotoUrl != "/images/default.png")
+        {
+            <img src="@entry.PhotoUrl" alt="Фото пользователя" width="150" />
+        }
+
+        <form method="post" asp-page-handler="Delete">
+            <input type="hidden" name="partitionKey" value="@entry.PartitionKey" />
+            <input type="hidden" name="rowKey" value="@entry.RowKey" />
+            <button type="submit" class="btn btn-danger"
+                    onclick="return confirm('Удалить запись?')">
+                Удалить
+            </button>
+        </form>
+    </div>
+</div>
+}
